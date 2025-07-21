@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TraceCert Mint Form</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; }
+    label { display: block; margin-top: 0.5em; }
+    input, select, button { width: 100%; padding: 8px; margin: 6px 0; }
+    button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    .result { margin-top: 1em; padding: 1em; border: 1px solid #ccc; display: none; }
+  </style>
+</head>
+<body>
+  <h1>TraceCert NFT Minting Form</h1>
+  <form id="mintForm">
+    <label for="address">Property Address:</label>
+    <input type="text" id="address" name="address" required>
+
+    <label for="contractor">Contractor Name:</label>
+    <input type="text" id="contractor" name="contractor" required>
+
+    <label for="date">Completion Date:</label>
+    <input type="date" id="date" name="date" required>
+
+    <label for="type">Certificate Type:</label>
+    <select id="type" name="type" required>
+      <option value="Completion Certificate">Completion Certificate</option>
+      <option value="Final Certificate">Final Certificate</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="file">Upload PDF:</label>
+    <input type="file" id="file" name="file" accept="application/pdf" required>
+
+    <button type="submit">Mint Certificate</button>
+  </form>
+
+  <div id="result" class="result"></div>
+
+  <script>
+    document.getElementById('mintForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      try {
+        const response = await fetch('/mint', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        const resultDiv = document.getElementById('result');
+        if (data.status === 'success') {
+          resultDiv.innerHTML = `<p><strong>Token ID:</strong> ${data.tokenId}</p>
+            <p><strong>IPFS Link:</strong> <a href="${data.ipfs}" target="_blank">${data.ipfs}</a></p>
+            <p><strong>OpenSea Link:</strong> <a href="${data.opensea}" target="_blank">${data.opensea}</a></p>
+            <p><strong>Transaction Hash:</strong> ${data.txHash}</p>`;
+        } else {
+          resultDiv.innerHTML = `<p>Error: ${data.message}</p>`;
+        }
+        resultDiv.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<p>Error: ${err.message}</p>`;
+        resultDiv.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
